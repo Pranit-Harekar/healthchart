@@ -46,6 +46,11 @@ app.get("/health", (c) => {
   });
 });
 
+// Root route
+app.get("/", (c) => {
+  return c.text("200 OK");
+});
+
 // OpenAPI/Swagger documentation
 app.get("/swagger", swaggerUI({ url: "/openapi.json" }));
 
