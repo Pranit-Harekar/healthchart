@@ -1,8 +1,6 @@
-# HealthChart - QA Testing Sandbox API
+# HealthChart - Sandbox API
 
-**HealthChart** is a backend-only REST API simulating a patient appointment and records portal for a healthcare clinic. It is designed as a **QA testing sandbox** to practice and demonstrate comprehensive testing disciplines including functional testing, authorization, concurrency, compliance-flavored scenarios, and more.
-
-> ⚠️ **NOT FOR PRODUCTION USE** - This API contains intentionally planted bugs for QA training purposes. See `BUGS.md` for details (internal use only).
+**HealthChart** is a REST API for a patient appointment and records portal for a healthcare clinic. It is designed as a testing sandbox to practice and demonstrate comprehensive testing disciplines including functional testing, authorization, concurrency, compliance-flavored scenarios, and more.
 
 ## Features
 
@@ -27,7 +25,7 @@
 
 ## Database Schema
 
-![Database Schema](docs/database-schema.png)
+<img width="1317" height="1100" alt="Screenshot 2026-08-24 105933" src="https://github.com/user-attachments/assets/8b48684a-d042-41f9-856d-07a66903077e" />
 
 The database consists of 6 main tables with relationships for users, patients, appointments, clinical records, audit logs, and idempotency tracking.
 
@@ -294,7 +292,7 @@ This API is designed to be tested externally with tools like:
 
 ### Planted Bugs
 
-This API contains **10 intentionally planted bugs** for QA discovery exercises. See `BUGS.md` for the answer key (internal use only - do not share with testers before they complete their testing).
+This API contains **10 intentionally planted bugs** for QA discovery exercises.
 
 Bug categories:
 
@@ -390,4 +388,4 @@ For questions about the API design or testing scenarios, see [HealthChart_PRD.md
 
 ---
 
-**Built with ❤️ as a QA testing sandbox**
+**Built with ❤️ as a testing sandbox**
