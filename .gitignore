@@ -8,12 +8,26 @@
 .idea/usage.statistics.xml
 .idea/shelf
 
+# AI assistants (workspace-specific configs)
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+
 # deps
 node_modules/
 
 # env
 .env
 .env.production
+.env.local
+.env.*.local
+
+# build output
+dist/
+build/
+out/
+*.tsbuildinfo
 
 # logs
 logs/
@@ -24,5 +38,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# testing
+coverage/
+*.lcov
+.nyc_output/
+
 # misc
 .DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# QA answer key (don't commit the bugs list)
+BUGS.md
+
+# Prisma
+/src/generated/prisma

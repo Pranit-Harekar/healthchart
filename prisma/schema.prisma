@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  admin
+  provider
+  billing_staff
+  patient
+}
+
+enum PatientStatus {
+  active
+  inactive
+  deceased
+}
+
+enum AppointmentStatus {
+  requested
+  confirmed
+  checked_in
+  completed
+  cancelled
+  no_show
+}
+
+enum RecordType {
+  visit_note
+  lab_result
+  imaging
+  vaccination
+  mental_health
+  substance_use
+  general
+}
+
+enum RecordStatus {
+  draft
+  reviewed
+}
+
+model Profile {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role              Role
+  full_name         String
+  sensitive_access  Boolean   @default(false)
+  linked_patient_id String?   @unique @db.Uuid
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+
+  linked_patient          Patient?      @relation("PatientProfile", fields: [linked_patient_id], references: [id])
+  assigned_patients       Patient[]     @relation("AssignedProvider")
+  created_appointments    Appointment[] @relation("CreatedByProvider")
+  provider_appointments   Appointment[] @relation("ProviderAppointments")
+  authored_records        Record[]      @relation("RecordAuthor")
+  reviewed_records        Record[]      @relation("RecordReviewer")
+  audit_logs              AuditLog[]
+
+  @@map("profiles")
+}
+
+model Patient {
+  id                      String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name              String
+  last_name               String
+  date_of_birth           DateTime      @db.Date
+  email                   String        @unique
+  phone                   String?
+  address                 Json?
+  assigned_provider_id    String?       @db.Uuid
+  consent_data_sharing    Boolean       @default(false)
+  consent_updated_at      DateTime?     @db.Timestamptz(6)
+  status                  PatientStatus @default(active)
+  deleted_at              DateTime?     @db.Timestamptz(6)
+  created_at              DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime      @updatedAt @db.Timestamptz(6)
+
+  assigned_provider Profile?      @relation("AssignedProvider", fields: [assigned_provider_id], references: [id])
+  profile               Profile?      @relation("PatientProfile")
+  appointments          Appointment[]
+  records               Record[]
+  audit_logs            AuditLog[]
+
+  @@map("patients")
+}
+
+model Appointment {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patient_id       String            @db.Uuid
+  provider_id      String            @db.Uuid
+  start_time       DateTime          @db.Timestamptz(6)
+  end_time         DateTime          @db.Timestamptz(6)
+  status           AppointmentStatus @default(requested)
+  reason           String?
+  cancelled_reason String?
+  created_by       String            @db.Uuid
+  created_at       DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime          @updatedAt @db.Timestamptz(6)
+
+  patient    Patient  @relation(fields: [patient_id], references: [id])
+  provider   Profile  @relation("ProviderAppointments", fields: [provider_id], references: [id])
+  creator    Profile  @relation("CreatedByProvider", fields: [created_by], references: [id])
+  records    Record[]
+
+  @@map("appointments")
+}
+
+model Record {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  patient_id     String       @db.Uuid
+  appointment_id String?      @db.Uuid
+  author_id      String       @db.Uuid
+  record_type    RecordType
+  title          String
+  body           String
+  status         RecordStatus @default(draft)
+  reviewed_at    DateTime?    @db.Timestamptz(6)
+  reviewed_by    String?      @db.Uuid
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime     @updatedAt @db.Timestamptz(6)
+
+  patient     Patient      @relation(fields: [patient_id], references: [id])
+  appointment Appointment? @relation(fields: [appointment_id], references: [id])
+  author      Profile      @relation("RecordAuthor", fields: [author_id], references: [id])
+  reviewer    Profile?     @relation("RecordReviewer", fields: [reviewed_by], references: [id])
+
+  @@map("records")
+}
+
+model AuditLog {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actor_id      String?  @db.Uuid
+  actor_role    String
+  action        String
+  resource_type String
+  resource_id   String?  @db.Uuid
+  patient_id    String?  @db.Uuid
+  metadata      Json?
+  ip_address    String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  actor   Profile? @relation(fields: [actor_id], references: [id])
+  patient Patient? @relation(fields: [patient_id], references: [id])
+
+  @@map("audit_logs")
+}
+
+model IdempotencyKey {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key             String
+  user_id         String   @db.Uuid
+  response_status Int
+  response_body   Json
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([key, user_id])
+  @@map("idempotency_keys")
+}

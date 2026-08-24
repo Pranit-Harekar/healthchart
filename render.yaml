@@ -1,0 +1,26 @@
+services:
+  # Production environment
+  - type: web
+    name: healthchart
+    env: node
+    region: oregon
+    plan: starter
+    branch: main
+    buildCommand: npm install && npm run db:generate && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true

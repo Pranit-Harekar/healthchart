@@ -437,6 +437,8 @@ See §9. No production credentials, secrets, or data should ever be reachable fr
 
 ## 9. Environments & Deployment
 
+> **Implementation Note:** The current implementation uses a single production environment for simplicity. The PRD originally specified staging and production environments, but this has been simplified to just production deploying from the `main` branch.
+
 Two environments: **staging** and **production**.
 
 ### 9.1 Branch strategy
