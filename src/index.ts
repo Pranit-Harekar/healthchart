@@ -58,10 +58,10 @@ app.get("/openapi.json", (c) => {
   return c.json({
     openapi: "3.0.0",
     info: {
-      title: "HealthChart QA Testing API",
+      title: "HealthChart Sandbox API",
       version: "1.0.0",
       description:
-        "Healthcare API simulation with intentionally planted bugs for QA testing exercises",
+        "Healthcare API sandbox with realistic endpoints for testing practice and validation",
     },
     servers: [
       {

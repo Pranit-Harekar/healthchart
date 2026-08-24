@@ -292,7 +292,7 @@ This API is designed to be tested externally with tools like:
 
 ### Planted Bugs
 
-This API contains **10 intentionally planted bugs** for QA discovery exercises.
+This API contains **10 intentionally planted bugs** for testing discovery and validation practice.
 
 Bug categories:
 
