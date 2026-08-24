@@ -55,7 +55,8 @@ app.get("/openapi.json", (c) => {
     info: {
       title: "HealthChart QA Testing API",
       version: "1.0.0",
-      description: "Healthcare API simulation with intentionally planted bugs for QA testing exercises",
+      description:
+        "Healthcare API simulation with intentionally planted bugs for QA testing exercises",
     },
     servers: [
       {
@@ -88,7 +89,10 @@ app.get("/openapi.json", (c) => {
                   properties: {
                     email: { type: "string", format: "email" },
                     password: { type: "string", minLength: 8 },
-                    role: { type: "string", enum: ["admin", "provider", "billing_staff", "patient"] },
+                    role: {
+                      type: "string",
+                      enum: ["admin", "provider", "billing_staff", "patient"],
+                    },
                     name: { type: "string" },
                     sensitive_access: { type: "boolean" },
                     linked_patient_id: { type: "string", format: "uuid" },
@@ -136,8 +140,16 @@ app.get("/openapi.json", (c) => {
           tags: ["Patients"],
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: "page", in: "query", schema: { type: "integer", default: 1 } },
-            { name: "limit", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
+            {
+              name: "page",
+              in: "query",
+              schema: { type: "integer", default: 1 },
+            },
+            {
+              name: "limit",
+              in: "query",
+              schema: { type: "integer", default: 10, maximum: 100 },
+            },
             { name: "consenting", in: "query", schema: { type: "boolean" } },
           ],
           responses: {
@@ -162,7 +174,12 @@ app.get("/openapi.json", (c) => {
           tags: ["Patients"],
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
           ],
           responses: {
             "200": { description: "Consent updated" },
@@ -178,8 +195,16 @@ app.get("/openapi.json", (c) => {
           tags: ["Appointments"],
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: "page", in: "query", schema: { type: "integer", default: 1 } },
-            { name: "limit", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
+            {
+              name: "page",
+              in: "query",
+              schema: { type: "integer", default: 1 },
+            },
+            {
+              name: "limit",
+              in: "query",
+              schema: { type: "integer", default: 10, maximum: 100 },
+            },
             { name: "status", in: "query", schema: { type: "string" } },
           ],
           responses: {
@@ -204,9 +229,21 @@ app.get("/openapi.json", (c) => {
           tags: ["Records"],
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: "page", in: "query", schema: { type: "integer", default: 1 } },
-            { name: "limit", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
-            { name: "patient_id", in: "query", schema: { type: "string", format: "uuid" } },
+            {
+              name: "page",
+              in: "query",
+              schema: { type: "integer", default: 1 },
+            },
+            {
+              name: "limit",
+              in: "query",
+              schema: { type: "integer", default: 10, maximum: 100 },
+            },
+            {
+              name: "patient_id",
+              in: "query",
+              schema: { type: "string", format: "uuid" },
+            },
             { name: "record_type", in: "query", schema: { type: "string" } },
           ],
           responses: {
@@ -231,8 +268,16 @@ app.get("/openapi.json", (c) => {
           tags: ["Audit"],
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: "page", in: "query", schema: { type: "integer", default: 1 } },
-            { name: "limit", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
+            {
+              name: "page",
+              in: "query",
+              schema: { type: "integer", default: 1 },
+            },
+            {
+              name: "limit",
+              in: "query",
+              schema: { type: "integer", default: 10, maximum: 100 },
+            },
           ],
           responses: {
             "200": { description: "List of audit logs" },
