@@ -1,3 +1,5 @@
+<img width="2400" height="1350" alt="BrandBird 2026-08-24 15 30 51" src="https://github.com/user-attachments/assets/c5a68ed9-b312-45cb-a8b7-7fc732eb6685" />
+
 # HealthChart - Sandbox API
 
 **HealthChart** is a REST API for a patient appointment and records portal for a healthcare clinic. It is designed as a testing sandbox to practice and demonstrate comprehensive testing disciplines including functional testing, authorization, concurrency, compliance-flavored scenarios, and more.
