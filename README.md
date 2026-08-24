@@ -25,6 +25,12 @@
 - **Authentication:** Supabase Auth (JWT-based)
 - **Deployment:** Render (Web Service)
 
+## Database Schema
+
+![Database Schema](docs/database-schema.png)
+
+The database consists of 6 main tables with relationships for users, patients, appointments, clinical records, audit logs, and idempotency tracking.
+
 ## Prerequisites
 
 - Node.js 20 or higher
