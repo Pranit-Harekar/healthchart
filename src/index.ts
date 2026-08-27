@@ -54,254 +54,257 @@ app.get("/", (c) => {
 // OpenAPI/Swagger documentation
 app.get("/swagger", swaggerUI({ url: "/openapi.json" }));
 
+// Explicit type keeps TS from inferring an excessively deep literal type for this large object.
+const openApiSpec: Record<string, unknown> = {
+  openapi: "3.0.0",
+  info: {
+    title: "HealthChart Sandbox API",
+    version: "1.0.0",
+    description:
+      "Healthcare API sandbox with realistic endpoints for testing practice and validation",
+  },
+  servers: [
+    {
+      url: "https://healthchart.onrender.com",
+      description: "Production server",
+    },
+  ],
+  paths: {
+    "/health": {
+      get: {
+        summary: "Health check",
+        responses: {
+          "200": {
+            description: "Server is healthy",
+          },
+        },
+      },
+    },
+    "/api/v1/auth/register": {
+      post: {
+        summary: "Register a new user",
+        tags: ["Authentication"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["email", "password", "role"],
+                properties: {
+                  email: { type: "string", format: "email" },
+                  password: { type: "string", minLength: 8 },
+                  role: {
+                    type: "string",
+                    enum: ["admin", "provider", "billing_staff", "patient"],
+                  },
+                  name: { type: "string" },
+                  sensitive_access: { type: "boolean" },
+                  linked_patient_id: { type: "string", format: "uuid" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "User registered successfully" },
+          "400": { description: "Validation error" },
+          "409": { description: "User already exists" },
+        },
+      },
+    },
+    "/api/v1/auth/login": {
+      post: {
+        summary: "Login",
+        tags: ["Authentication"],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["email", "password"],
+                properties: {
+                  email: { type: "string", format: "email" },
+                  password: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Login successful, returns access token" },
+          "401": { description: "Invalid credentials" },
+          "403": { description: "Account locked" },
+        },
+      },
+    },
+    "/api/v1/patients": {
+      get: {
+        summary: "List patients",
+        tags: ["Patients"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "page",
+            in: "query",
+            schema: { type: "integer", default: 1 },
+          },
+          {
+            name: "limit",
+            in: "query",
+            schema: { type: "integer", default: 10, maximum: 100 },
+          },
+          { name: "consenting", in: "query", schema: { type: "boolean" } },
+        ],
+        responses: {
+          "200": { description: "List of patients" },
+          "401": { description: "Unauthorized" },
+        },
+      },
+      post: {
+        summary: "Create patient",
+        tags: ["Patients"],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "201": { description: "Patient created" },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden" },
+        },
+      },
+    },
+    "/api/v1/patients/{id}/consent": {
+      post: {
+        summary: "Update patient consent",
+        tags: ["Patients"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": { description: "Consent updated" },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden" },
+          "404": { description: "Patient not found" },
+        },
+      },
+    },
+    "/api/v1/appointments": {
+      get: {
+        summary: "List appointments",
+        tags: ["Appointments"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "page",
+            in: "query",
+            schema: { type: "integer", default: 1 },
+          },
+          {
+            name: "limit",
+            in: "query",
+            schema: { type: "integer", default: 10, maximum: 100 },
+          },
+          { name: "status", in: "query", schema: { type: "string" } },
+        ],
+        responses: {
+          "200": { description: "List of appointments" },
+          "401": { description: "Unauthorized" },
+        },
+      },
+      post: {
+        summary: "Create appointment",
+        tags: ["Appointments"],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "201": { description: "Appointment created" },
+          "401": { description: "Unauthorized" },
+          "409": { description: "Conflict - double booking" },
+        },
+      },
+    },
+    "/api/v1/records": {
+      get: {
+        summary: "List clinical records",
+        tags: ["Records"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "page",
+            in: "query",
+            schema: { type: "integer", default: 1 },
+          },
+          {
+            name: "limit",
+            in: "query",
+            schema: { type: "integer", default: 10, maximum: 100 },
+          },
+          {
+            name: "patient_id",
+            in: "query",
+            schema: { type: "string", format: "uuid" },
+          },
+          { name: "record_type", in: "query", schema: { type: "string" } },
+        ],
+        responses: {
+          "200": { description: "List of records" },
+          "401": { description: "Unauthorized" },
+        },
+      },
+      post: {
+        summary: "Create clinical record",
+        tags: ["Records"],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "201": { description: "Record created" },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden" },
+        },
+      },
+    },
+    "/api/v1/audit-logs": {
+      get: {
+        summary: "List audit logs (admin only)",
+        tags: ["Audit"],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "page",
+            in: "query",
+            schema: { type: "integer", default: 1 },
+          },
+          {
+            name: "limit",
+            in: "query",
+            schema: { type: "integer", default: 10, maximum: 100 },
+          },
+        ],
+        responses: {
+          "200": { description: "List of audit logs" },
+          "401": { description: "Unauthorized" },
+          "403": { description: "Forbidden - admin only" },
+        },
+      },
+    },
+  },
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+};
+
 app.get("/openapi.json", (c) => {
-  return c.json({
-    openapi: "3.0.0",
-    info: {
-      title: "HealthChart Sandbox API",
-      version: "1.0.0",
-      description:
-        "Healthcare API sandbox with realistic endpoints for testing practice and validation",
-    },
-    servers: [
-      {
-        url: `http://localhost:${port}`,
-        description: "Development server",
-      },
-    ],
-    paths: {
-      "/health": {
-        get: {
-          summary: "Health check",
-          responses: {
-            "200": {
-              description: "Server is healthy",
-            },
-          },
-        },
-      },
-      "/api/v1/auth/register": {
-        post: {
-          summary: "Register a new user",
-          tags: ["Authentication"],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["email", "password", "role"],
-                  properties: {
-                    email: { type: "string", format: "email" },
-                    password: { type: "string", minLength: 8 },
-                    role: {
-                      type: "string",
-                      enum: ["admin", "provider", "billing_staff", "patient"],
-                    },
-                    name: { type: "string" },
-                    sensitive_access: { type: "boolean" },
-                    linked_patient_id: { type: "string", format: "uuid" },
-                  },
-                },
-              },
-            },
-          },
-          responses: {
-            "201": { description: "User registered successfully" },
-            "400": { description: "Validation error" },
-            "409": { description: "User already exists" },
-          },
-        },
-      },
-      "/api/v1/auth/login": {
-        post: {
-          summary: "Login",
-          tags: ["Authentication"],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["email", "password"],
-                  properties: {
-                    email: { type: "string", format: "email" },
-                    password: { type: "string" },
-                  },
-                },
-              },
-            },
-          },
-          responses: {
-            "200": { description: "Login successful, returns access token" },
-            "401": { description: "Invalid credentials" },
-            "403": { description: "Account locked" },
-          },
-        },
-      },
-      "/api/v1/patients": {
-        get: {
-          summary: "List patients",
-          tags: ["Patients"],
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: "page",
-              in: "query",
-              schema: { type: "integer", default: 1 },
-            },
-            {
-              name: "limit",
-              in: "query",
-              schema: { type: "integer", default: 10, maximum: 100 },
-            },
-            { name: "consenting", in: "query", schema: { type: "boolean" } },
-          ],
-          responses: {
-            "200": { description: "List of patients" },
-            "401": { description: "Unauthorized" },
-          },
-        },
-        post: {
-          summary: "Create patient",
-          tags: ["Patients"],
-          security: [{ bearerAuth: [] }],
-          responses: {
-            "201": { description: "Patient created" },
-            "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden" },
-          },
-        },
-      },
-      "/api/v1/patients/{id}/consent": {
-        post: {
-          summary: "Update patient consent",
-          tags: ["Patients"],
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: "id",
-              in: "path",
-              required: true,
-              schema: { type: "string", format: "uuid" },
-            },
-          ],
-          responses: {
-            "200": { description: "Consent updated" },
-            "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden" },
-            "404": { description: "Patient not found" },
-          },
-        },
-      },
-      "/api/v1/appointments": {
-        get: {
-          summary: "List appointments",
-          tags: ["Appointments"],
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: "page",
-              in: "query",
-              schema: { type: "integer", default: 1 },
-            },
-            {
-              name: "limit",
-              in: "query",
-              schema: { type: "integer", default: 10, maximum: 100 },
-            },
-            { name: "status", in: "query", schema: { type: "string" } },
-          ],
-          responses: {
-            "200": { description: "List of appointments" },
-            "401": { description: "Unauthorized" },
-          },
-        },
-        post: {
-          summary: "Create appointment",
-          tags: ["Appointments"],
-          security: [{ bearerAuth: [] }],
-          responses: {
-            "201": { description: "Appointment created" },
-            "401": { description: "Unauthorized" },
-            "409": { description: "Conflict - double booking" },
-          },
-        },
-      },
-      "/api/v1/records": {
-        get: {
-          summary: "List clinical records",
-          tags: ["Records"],
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: "page",
-              in: "query",
-              schema: { type: "integer", default: 1 },
-            },
-            {
-              name: "limit",
-              in: "query",
-              schema: { type: "integer", default: 10, maximum: 100 },
-            },
-            {
-              name: "patient_id",
-              in: "query",
-              schema: { type: "string", format: "uuid" },
-            },
-            { name: "record_type", in: "query", schema: { type: "string" } },
-          ],
-          responses: {
-            "200": { description: "List of records" },
-            "401": { description: "Unauthorized" },
-          },
-        },
-        post: {
-          summary: "Create clinical record",
-          tags: ["Records"],
-          security: [{ bearerAuth: [] }],
-          responses: {
-            "201": { description: "Record created" },
-            "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden" },
-          },
-        },
-      },
-      "/api/v1/audit-logs": {
-        get: {
-          summary: "List audit logs (admin only)",
-          tags: ["Audit"],
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: "page",
-              in: "query",
-              schema: { type: "integer", default: 1 },
-            },
-            {
-              name: "limit",
-              in: "query",
-              schema: { type: "integer", default: 10, maximum: 100 },
-            },
-          ],
-          responses: {
-            "200": { description: "List of audit logs" },
-            "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden - admin only" },
-          },
-        },
-      },
-    },
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-    },
-  });
+  return c.json(openApiSpec);
 });
 
 // API routes
